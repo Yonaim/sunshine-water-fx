@@ -44,7 +44,7 @@ void main()
 	vec3 shineColor = vec3(1.0, 2.5, 1.5);
 	float strength = 0.22;
 	vec3  water = bgColor + vec3(moire * strength) + hi * vec3(0.9, 0.95, 1.5);;
-	vec3 finalColor = mix(water, shineColor, band * 0.1);
+	vec3 finalColor = mix(water, shineColor, band * 0.05);
 
 	// --- 디버그용 ---
 	// outColor = vec4(band, band, band, 1.0); // 밴드 마스킹 확인
