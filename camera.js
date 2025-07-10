@@ -1,3 +1,4 @@
+import { mat4 } from "https://cdn.jsdelivr.net/npm/gl-matrix@3.4.3/+esm";
 /* * OrbitCamera.js
  * A simple orbit camera implementation for WebGL.
  * Allows the user to rotate the camera around a point and zoom in/out.   
@@ -7,8 +8,8 @@
 export class OrbitCamera {
     constructor() {
       this.azimuth = 0.0; // azimuthal angle in radians
-      this.elevation = 0.2; // elevation angle in radians
-      this.distance = 2;
+      this.elevation = 0.4; // elevation angle in radians
+      this.distance = 2.0;
       this.lastX = 0; this.lastY = 0; this.dragging = false;
       this.initEvents();
     }
@@ -37,18 +38,14 @@ export class OrbitCamera {
       const eye = [
         this.distance * Math.cos(this.elevation) * Math.sin(this.azimuth),
         this.distance * Math.sin(this.elevation) + 0,
-        this.distance * Math.cos(this.elevation) * Math.cos(this.azimuth) + 2
+        this.distance * Math.cos(this.elevation) * Math.cos(this.azimuth)
       ];
       return lookAt(eye, [0,0,0], [0,1,0]);
     }
     getSkyboxViewMatrix() {
-        const R = 1.0; // radius (zoom 영향 없음)
-        const eye = [
-          R * Math.cos(this.elevation) * Math.sin(this.azimuth),
-          R * Math.sin(this.elevation),
-          R * Math.cos(this.elevation) * Math.cos(this.azimuth) + 2
-        ];
-        return lookAt(eye, [0,0,0], [0,1,0]);
+        const view = mat4.clone(this.getViewMatrix());
+        view[12] = view[13] = view[14] = 0.0;
+        return view;
       }
   }
   

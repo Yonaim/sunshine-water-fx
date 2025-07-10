@@ -64,24 +64,25 @@ function render(time) {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   
     // ---------- Camera ----------
-    const fovy = Math.PI / 4;
+    const fovy = Math.PI / 2;
     const aspect = canvas.width / canvas.height;
     const near = 0.1;
     const far = 100.0;
+    camera.azimuth += 0.005; 
     
     // -------- Matrices ----------
     const model = mat4.create();
     const view = camera.getViewMatrix();
     const proj = mat4.create();
-    const viewNoTrans = camera.getSkyboxViewMatrix(); // for skybox
-    viewNoTrans[12] = 0; viewNoTrans[13] = 0; viewNoTrans[14] = 0;
+    const skyboxView = mat4.clone(view);
+    skyboxView[12]=skyboxView[13]=skyboxView[14]=0;
     mat4.perspective(proj, fovy, aspect, near, far);
     const mvp = mat4.create();
     mat4.multiply(mvp, proj, view);
   
     // ----- Skybox -----
-    skybox.draw(viewNoTrans, proj, skyboxFbo, canvas.width, canvas.height);
-    skybox.draw(viewNoTrans, proj);
+    skybox.draw(skyboxView, proj, skyboxFbo, canvas.width, canvas.height);
+    skybox.draw(skyboxView, proj);
 
     // ----- waterPlane -----
     waterPlane.draw(
