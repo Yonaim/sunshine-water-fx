@@ -46,7 +46,16 @@ createManualMipmapTexture(gl, mipmapFiles, 0).then(tex => {
     waveTex = tex;
     requestAnimationFrame(render);
   });
-  
+
+const skyboxFbo = gl.createFramebuffer();
+const skyboxFboTex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, skyboxFboTex);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.bindFramebuffer(gl.FRAMEBUFFER, skyboxFbo);
+gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, skyboxFboTex, 0);
+
 
 function render(time) {
     gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
@@ -71,18 +80,7 @@ function render(time) {
     mat4.multiply(mvp, proj, view);
   
     // ----- Skybox -----
-    // 1. FBO 준비
-    const fbo = gl.createFramebuffer();
-    const fboTex = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, fboTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fboTex, 0);
-
-    // 2. skybox 렌더링 (FBO, Screen 각각)
-    skybox.draw(viewNoTrans, proj, fbo, canvas.width, canvas.height);
+    skybox.draw(viewNoTrans, proj, skyboxFbo, canvas.width, canvas.height);
     skybox.draw(viewNoTrans, proj);
 
     // ----- waterPlane -----
