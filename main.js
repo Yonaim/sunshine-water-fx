@@ -6,9 +6,14 @@ import { createProgram } from './utils.js';
 import { loadCubemap } from './cubemap.js';
 import { planeFS, planeVS, WaterPlane } from './WaterPlane.js';
 
+// ======================== Initialization ========================
 const canvas = document.getElementById('webgl');
-const gl = canvas.getContext('webgl2');
+const gl = canvas.getContext('webgl2', { alpha: true, premultipliedAlpha: false });
 if (!gl) throw 'WebGL2 not supported';
+
+// for compability with webGL version of github.io (github pages)
+gl.enable(gl.BLEND);
+gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 // ======================== Objects ========================
 const faceInfos = [
