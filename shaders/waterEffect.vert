@@ -11,6 +11,6 @@ void main()
 {
 	gl_Position = u_modelViewProjection * vec4(a_position, 1.0);
 
-    float uv_scailing = 0.8; // UV 스케일링 값 (추후 조정)
+    float uv_scailing = 1.0; // UV 스케일링 값 (추후 조정)
 	v_uv        = (a_position.xz / (u_scale * uv_scailing)) + 0.5; // Normalize UV coordinates
 }
