@@ -5,6 +5,9 @@ import { mat4 } from "https://cdn.jsdelivr.net/npm/gl-matrix@3.4.3/+esm";
  * Allows mouse dragging to rotate and scroll wheel to zoom.
  */
 
+const maxDistance = 30.0;
+const minDistance = 0.5; // Minimum distance to prevent camera from going inside the object
+
 export class OrbitCamera {
     constructor() {
       this.azimuth = 0.0; // azimuthal angle in radians
@@ -30,7 +33,7 @@ export class OrbitCamera {
       });
       canvas.addEventListener('wheel', e => {
         this.distance += e.deltaY * 0.01;
-        this.distance = Math.max(0.5, Math.min(10, this.distance));
+        this.distance = Math.max(minDistance, Math.min(maxDistance, this.distance));
         e.preventDefault();
       });
     }
