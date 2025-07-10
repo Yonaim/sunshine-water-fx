@@ -67,4 +67,8 @@ void main()
     // outColor = vec4(moire, moire, moire, 1.0);
 
 	outColor = vec4(finalColor, 1.0);
+	float brightness
+		= dot(outColor.rgb, vec3(0.299, 0.587, 0.114));
+	if (brightness > 0.53 && brightness < 0.72)
+		discard;
 }
