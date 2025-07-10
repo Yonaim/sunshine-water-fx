@@ -29,6 +29,7 @@ const waterPlane = new WaterPlane(gl, planeProg, planeScale);
 
 // ======================== Rendering ========================
 const baseColor = [0.10, 0.65, 1.0];
+// const baseColor = [0.223, 0.494, 0.835];
 const mipmapFiles = [
     'mipmap/L0.png', // level 0 (original)
     'mipmap/L1.png', // level 0 (1/2)
@@ -86,11 +87,11 @@ function render(time) {
 
     // ----- waterPlane -----
     waterPlane.draw(
+        baseColor,
         waveTex,
         time * 0.003,
         mvp,
-        2.0,
-        fboTex,        // skybox FBO texture
+        skyboxFboTex,        // skybox FBO texture
         [canvas.width, canvas.height]
     );
     

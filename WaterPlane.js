@@ -23,10 +23,13 @@ export class WaterPlane {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.verts), gl.STATIC_DRAW);
     }
-    draw(waveTex, time, mvp, lodBias, screenColorTex, screenSize) {
+    draw(baseColor, waveTex, time, mvp, screenColorTex, screenSize) {
         const gl = this.gl;
         gl.useProgram(this.program);
     
+        gl.uniform1f(gl.getUniformLocation(this.program, 'u_time'), time);
+        gl.uniform3f(gl.getUniformLocation(this.program, 'baseColor'), baseColor[0], baseColor[1], baseColor[2]);
+        
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
         gl.enableVertexAttribArray(0);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
@@ -45,7 +48,6 @@ export class WaterPlane {
         gl.uniform1f(gl.getUniformLocation(this.program, 'u_scale'), this.scale);
         gl.uniform1f(gl.getUniformLocation(this.program, 'u_time'), time);
         gl.uniformMatrix4fv(gl.getUniformLocation(this.program, 'u_modelViewProjection'), false, mvp);
-        gl.uniform1f(gl.getUniformLocation(this.program, 'lodBias'), lodBias);
         gl.uniform2f(gl.getUniformLocation(this.program, 'screenSize'), screenSize[0], screenSize[1]);
     
         gl.drawArrays(gl.TRIANGLES, 0, 6);
