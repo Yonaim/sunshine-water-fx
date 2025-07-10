@@ -3,13 +3,18 @@ precision mediump float;
 layout(location = 0) in vec3 a_position;
 out vec3 v_dir;
 
-uniform mat4 u_view;
+uniform mat4 u_view; // (translation 0, only rotation)
 uniform mat4 u_proj;
 
 void main()
 {
-	// 카메라 회전만 반영 (view 행렬의 3x3 부분만 사용)
-	v_dir = mat3(u_view) * a_position;
-	// gl_Position은 정점 그대로(투영) → 평행이동은 필요없음!
-	gl_Position = u_proj * vec4(a_position, 1.0);
+	// 큐브맵 샘플 방향 : 회전 주지 않고 그대로
+	v_dir = a_position;
+
+	// 지오메트리(큐브)만 카메라 회전으로 돌림
+	vec3 rotated = mat3(u_view) * a_position;
+	vec4 clipPos = u_proj * vec4(rotated, 1.0);
+
+	// 깊이 w로 고정
+	gl_Position = clipPos.xyww;
 }
