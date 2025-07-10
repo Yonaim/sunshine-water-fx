@@ -8,8 +8,8 @@ import { mat4 } from "https://cdn.jsdelivr.net/npm/gl-matrix@3.4.3/+esm";
 export class OrbitCamera {
     constructor() {
       this.azimuth = 0.0; // azimuthal angle in radians
-      this.elevation = 0.4; // elevation angle in radians
-      this.distance = 2.0;
+      this.elevation = 0.7; // elevation angle in radians
+      this.distance = 19.0;
       this.lastX = 0; this.lastY = 0; this.dragging = false;
       this.initEvents();
     }
@@ -37,7 +37,7 @@ export class OrbitCamera {
     getViewMatrix() {
       const eye = [
         this.distance * Math.cos(this.elevation) * Math.sin(this.azimuth),
-        this.distance * Math.sin(this.elevation) + 0,
+        this.distance * Math.sin(this.elevation),
         this.distance * Math.cos(this.elevation) * Math.cos(this.azimuth)
       ];
       return lookAt(eye, [0,0,0], [0,1,0]);

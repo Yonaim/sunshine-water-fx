@@ -24,7 +24,7 @@ const camera = new OrbitCamera();
 const skyboxProg = createProgram(gl, skyboxVS, skyboxFS);
 const planeProg = createProgram(gl, planeVS, planeFS);
 const skybox = new Skybox(gl, skyboxProg, cubemap);
-const planeScale = 1.0;
+const planeScale = 10.0;
 const waterPlane = new WaterPlane(gl, planeProg, planeScale);
 
 // ======================== Rendering ========================

@@ -11,12 +11,12 @@ export class WaterPlane {
         this.program = program;
         this.scale = scale;
         this.verts = [
-            -scale, -1, -scale,
-             scale, -1, -scale,
-            -scale, -1,  scale,
-            -scale, -1,  scale,
-             scale, -1, -scale,
-             scale, -1,  scale
+            -scale, 0, -scale,
+             scale, 0, -scale,
+            -scale, 0,  scale,
+            -scale, 0,  scale,
+             scale, 0, -scale,
+             scale, 0,  scale
         ];
 
         this.buf = gl.createBuffer();
