@@ -71,20 +71,6 @@ For educational and research purposes only. All original techniques are credited
 * EFB is used to capture the underwater scene
 * Depth-based transparency effects are applied
 
-## Implementation Notes
-
-* All effects are recreated using modern graphics APIs and custom GLSL shaders.
-* The project strictly follows the original techniques and logic, only adapting the implementation for a programmable pipeline.
-
-## Getting Started
-
-```bash
-git clone https://github.com/Yonaim/super-mario-sunshine-water-fx.git
-cd super-mario-sunshine-water-fx
-npm install
-npm run demo
-```
-
 ## References
 
 * [Blog post: The water effects in Super Mario Sunshine – How it works](https://yona-blog.netlify.app/posts/2025/07/the-water-effects-in-super-mario-sunshine/how-it-works/)
