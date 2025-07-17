@@ -1,7 +1,22 @@
 # Super Mario Sunshine Water FX
 
-Reverse engineering and recreation of the water effects from Super Mario Sunshine (2002).
-Live demo: [https://yonaim.github.io/super-mario-sunshine-water-fx/](https://yonaim.github.io/super-mario-sunshine-water-fx/)
+Reverse engineering and recreation of the water effects from Super Mario Sunshine (2002).  
+
+## Live demo
+<video controls src="demo.mov" title="Demo"></video>
+
+You can see this way -> [https://yonaim.github.io/super-mario-sunshine-water-fx/](https://yonaim.github.io/super-mario-sunshine-water-fx/)
+
+## Feature Checklist
+
+Now developing...
+
+* [x] Wave animation using multi-layer texture scrolling
+* [x] Specular Highlights 
+* [ ] Environment reflection
+* [ ] Refraction
+* [x] Transparency
+
 
 ## Overview
 
@@ -72,4 +87,4 @@ npm run demo
 ## References
 
 * [Blog post: The water effects in Super Mario Sunshine – How it works](https://yona-blog.netlify.app/posts/2025/07/the-water-effects-in-super-mario-sunshine/how-it-works/)
-* [Deconstructing the water effect in Super Mario Sunshine](https://blog.mecheye.net/2018/03/deconstructing-the-water-effect-in-super-mario-sunshine/)
+* [Blog post: Deconstructing the water effect in Super Mario Sunshine](https://blog.mecheye.net/2018/03/deconstructing-the-water-effect-in-super-mario-sunshine/)
