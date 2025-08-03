@@ -10,7 +10,6 @@ uniform float     u_time;
 uniform float     u_scale;
 uniform float     lodBias;
 uniform vec2      screenSize;
-uniform vec3      baseColor;
 
 // GLSL ES 3.0 compatible LOD approximation
 float getManualLod(vec2 uv, float textureSize)
@@ -28,9 +27,9 @@ void main()
 	vec2 offset2 = vec2(-0.3110, 0.3110) + u_time * vec2(-0.018, 0.021);
 	vec2 uv1 = v_uv + offset1;
 	vec2 uv2 = v_uv + offset2;
-    float lodBias = 0.5; // LOD 편향
+    float lodBias = 1.0; // LOD 편향
 	float manualLod = getManualLod(v_uv, 256.0);
-	manualLod    = lodBias;
+	manualLod       = lodBias;
 
 	float wave1 = texture(waveTex, uv1, manualLod).r;
 	float wave2 = texture(waveTex, uv2, manualLod).r;
@@ -38,12 +37,13 @@ void main()
 
     vec2 screenUV = gl_FragCoord.xy / screenSize;
     vec2 distort = vec2(wave1, wave2) - 0.5;
-    distort *= 0.7; // distortion scale
+    distort *= 1.0; // distortion scale
     vec3 refractColor = texture(refractionTex, distort).rgb;
     vec3 reflectColor = texture(reflectionTex, screenUV).rgb;
 
-    vec3  water = mix(baseColor, refractColor, 0.50) + vec3(moire);
-    vec3 finalColor = mix(water, reflectColor, 0.00);
+    vec3  water = refractColor + vec3(moire);
+    vec3 finalColor = mix(water, reflectColor, 0.30);
+    // finalColor = vec3(moire);
 
 	// -------------------------- 디버그용 ----------------------------
 	// outColor = vec4(band, band, band, 1.0); // 밴드 마스킹 확인

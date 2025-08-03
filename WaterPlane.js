@@ -23,12 +23,9 @@ export class WaterPlane {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.verts), gl.STATIC_DRAW);
     }
-    draw(baseColor, waveTex, time, mvp, reflectionTex, refractionTex, screenSize) {
+    draw(waveTex, time, mvp, reflectionTex, refractionTex, screenSize) {
         const gl = this.gl;
         gl.useProgram(this.program);
-
-        gl.uniform1f(gl.getUniformLocation(this.program, 'u_time'), time);
-        gl.uniform3f(gl.getUniformLocation(this.program, 'baseColor'), baseColor[0], baseColor[1], baseColor[2]);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
         gl.enableVertexAttribArray(0);

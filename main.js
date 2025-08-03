@@ -39,8 +39,6 @@ const treasureBox = await OBJModel.load(gl, modelProg, 'treasureBox.obj');
 const lightDir = vec3.normalize(vec3.create(), [1,1,1]);
 
 // ======================== Rendering ========================
-const baseColor = [0.10, 0.65, 1.0];
-// const baseColor = [0.223, 0.494, 0.835];
 const mipmapFiles = [
     'mipmap/L0.png', // level 0 (original)
     'mipmap/L1.png', // level 0 (1/2)
@@ -109,7 +107,7 @@ function render(time) {
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, reflectionFbo);
     gl.viewport(0,0,canvas.width,canvas.height);
-    gl.clearColor(baseColor[0], baseColor[1], baseColor[2], 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     skybox.draw(skyboxViewRef, proj, reflectionFbo, canvas.width, canvas.height);
@@ -126,7 +124,7 @@ function render(time) {
 
     // ----- Main scene -----
     gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
-    gl.clearColor(baseColor[0], baseColor[1], baseColor[2], 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     const skyboxView = mat4.clone(view);
@@ -141,7 +139,7 @@ function render(time) {
     star.draw(starModel, viewProj, starNormal, [1.0,0.85,0.0], lightDir, eye);
 
     const boxModel = mat4.create();
-    mat4.translate(boxModel, boxModel, [0,-5,0]);
+    mat4.translate(boxModel, boxModel, [4,-5,5]);
     mat4.scale(boxModel, boxModel, [2,2,2]);
     const boxNormal = mat3.create();
     mat3.normalFromMat4(boxNormal, boxModel);
@@ -152,7 +150,6 @@ function render(time) {
 
     const mvp = viewProj;
     waterPlane.draw(
-        baseColor,
         waveTex,
         time * 0.003,
         mvp,
