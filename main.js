@@ -5,7 +5,7 @@ import { Skybox, skyboxFS, skyboxVS } from './skybox.js';
 import { createProgram } from './utils.js';
 import { loadCubemap } from './cubemap.js';
 import { planeFS, planeVS, WaterPlane } from './WaterPlane.js';
-import { Sphere, sphereFS, sphereVS } from './Sphere.js';
+import { OBJModel, modelFS, modelVS } from './Model.js';
 
 // ======================== Initialization ========================
 const canvas = document.getElementById('webgl');
@@ -30,11 +30,12 @@ const cubemap = await loadCubemap(gl, faceInfos);
 const camera = new OrbitCamera();
 const skyboxProg = createProgram(gl, skyboxVS, skyboxFS);
 const planeProg = createProgram(gl, planeVS, planeFS);
-const sphereProg = createProgram(gl, sphereVS, sphereFS);
+const modelProg = createProgram(gl, modelVS, modelFS);
 const skybox = new Skybox(gl, skyboxProg, cubemap);
 const planeScale = 10.0;
 const waterPlane = new WaterPlane(gl, planeProg, planeScale);
-const sphere = new Sphere(gl, sphereProg);
+const star = await OBJModel.load(gl, modelProg, 'powerStar.obj');
+const treasureBox = await OBJModel.load(gl, modelProg, 'treasureBox.obj');
 const lightDir = vec3.normalize(vec3.create(), [1,1,1]);
 
 // ======================== Rendering ========================
@@ -113,13 +114,14 @@ function render(time) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     skybox.draw(skyboxViewRef, proj, reflectionFbo, canvas.width, canvas.height);
     gl.bindFramebuffer(gl.FRAMEBUFFER, reflectionFbo);
-    const sphereModel = mat4.create();
-    mat4.translate(sphereModel, sphereModel, [0,5,0]);
+    const starModelRef = mat4.create();
+    mat4.translate(starModelRef, starModelRef, [0,5,0]);
+    mat4.scale(starModelRef, starModelRef, [2,2,2]);
     const normalRef = mat3.create();
-    mat3.normalFromMat4(normalRef, sphereModel);
+    mat3.normalFromMat4(normalRef, starModelRef);
     const viewProjRef = mat4.create();
     mat4.multiply(viewProjRef, proj, viewRef);
-    sphere.draw(sphereModel, viewProjRef, normalRef, [0,1,0], lightDir, reflectedEye);
+    star.draw(starModelRef, viewProjRef, normalRef, [1.0,0.85,0.0], lightDir, reflectedEye);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     // ----- Main scene -----
@@ -131,11 +133,19 @@ function render(time) {
     skyboxView[12]=skyboxView[13]=skyboxView[14]=0;
     skybox.draw(skyboxView, proj);
 
-    const sphereModelMain = mat4.create();
-    mat4.translate(sphereModelMain, sphereModelMain, [0,5,0]);
-    const normalMain = mat3.create();
-    mat3.normalFromMat4(normalMain, sphereModelMain);
-    sphere.draw(sphereModelMain, viewProj, normalMain, [0,1,0], lightDir, eye);
+    const starModel = mat4.create();
+    mat4.translate(starModel, starModel, [0,5,0]);
+    mat4.scale(starModel, starModel, [2,2,2]);
+    const starNormal = mat3.create();
+    mat3.normalFromMat4(starNormal, starModel);
+    star.draw(starModel, viewProj, starNormal, [1.0,0.85,0.0], lightDir, eye);
+
+    const boxModel = mat4.create();
+    mat4.translate(boxModel, boxModel, [0,-5,0]);
+    mat4.scale(boxModel, boxModel, [2,2,2]);
+    const boxNormal = mat3.create();
+    mat3.normalFromMat4(boxNormal, boxModel);
+    treasureBox.draw(boxModel, viewProj, boxNormal, [0.55,0.27,0.07], lightDir, eye);
 
     gl.bindTexture(gl.TEXTURE_2D, refractionTex);
     gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, canvas.width, canvas.height);
