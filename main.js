@@ -34,8 +34,19 @@ const modelProg = createProgram(gl, modelVS, modelFS);
 const skybox = new Skybox(gl, skyboxProg, cubemap);
 const planeScale = 10.0;
 const waterPlane = new WaterPlane(gl, planeProg, planeScale);
-const star = await OBJModel.load(gl, modelProg, 'powerStar.obj');
-const treasureBox = await OBJModel.load(gl, modelProg, 'treasureBox.obj');
+const star = await OBJModel.load(gl, modelProg, 'model/powerStar.obj');
+const treasureBox = await OBJModel.load(gl, modelProg, 'model/treasureBox.obj');
+const starMaterials = {
+    Empty: { color: [1.0,0.85,0.0], emissive: [0.25,0.21075,0.0] },
+    FooMat: { color: [1.0,0.85,0.0], emissive: [0.25,0.21075,0.0] },
+    Eye: { color: [0.0,0.0,0.0], emissive: [0.0,0.0,0.0] },
+    'Eye(2)': { color: [0.0,0.0,0.0], emissive: [0.0,0.0,0.0] },
+    'Eye(3)': { color: [0.0,0.0,0.0], emissive: [0.0,0.0,0.0] },
+    default: { color: [1.0,0.85,0.0], emissive: [0.25,0.21075,0.0] }
+};
+const boxMaterials = {
+    default: { color: [0.55,0.27,0.07], emissive: [0.0,0.0,0.0] }
+};
 const lightDir = vec3.normalize(vec3.create(), [1,1,1]);
 
 // ======================== Rendering ========================
@@ -119,7 +130,7 @@ function render(time) {
     mat3.normalFromMat4(normalRef, starModelRef);
     const viewProjRef = mat4.create();
     mat4.multiply(viewProjRef, proj, viewRef);
-    star.draw(starModelRef, viewProjRef, normalRef, [1.0,0.85,0.0], lightDir, reflectedEye);
+    star.draw(starModelRef, viewProjRef, normalRef, starMaterials, lightDir, reflectedEye);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     // ----- Main scene -----
@@ -136,14 +147,14 @@ function render(time) {
     mat4.scale(starModel, starModel, [2,2,2]);
     const starNormal = mat3.create();
     mat3.normalFromMat4(starNormal, starModel);
-    star.draw(starModel, viewProj, starNormal, [1.0,0.85,0.0], lightDir, eye);
+    star.draw(starModel, viewProj, starNormal, starMaterials, lightDir, eye);
 
     const boxModel = mat4.create();
     mat4.translate(boxModel, boxModel, [4,-5,5]);
     mat4.scale(boxModel, boxModel, [2,2,2]);
     const boxNormal = mat3.create();
     mat3.normalFromMat4(boxNormal, boxModel);
-    treasureBox.draw(boxModel, viewProj, boxNormal, [0.55,0.27,0.07], lightDir, eye);
+    treasureBox.draw(boxModel, viewProj, boxNormal, boxMaterials, lightDir, eye);
 
     gl.bindTexture(gl.TEXTURE_2D, refractionTex);
     gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, canvas.width, canvas.height);
