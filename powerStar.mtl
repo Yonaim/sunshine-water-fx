@@ -1,0 +1,52 @@
+# Blender 4.5.1 LTS MTL File: 'None'
+# www.blender.org
+
+newmtl Empty
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/Yona/Downloads/Wii - Super Mario Galaxy - Items - Power Star/Power Star/GroundStarHiLight2.png
+
+newmtl Eye
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/Yona/Downloads/Wii - Super Mario Galaxy - Items - Power Star/Power Star/GroundStarHiLight2.png
+
+newmtl Eye(2)
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/Yona/Downloads/Wii - Super Mario Galaxy - Items - Power Star/Power Star/GroundStarHiLight2.png
+
+newmtl Eye(3)
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/Yona/Downloads/Wii - Super Mario Galaxy - Items - Power Star/Power Star/GroundStarHiLight2.png
+
+newmtl FooMat
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd C:/Users/Yona/Downloads/Wii - Super Mario Galaxy - Items - Power Star/Power Star/PowerStar.0.png
