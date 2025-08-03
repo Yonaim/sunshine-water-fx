@@ -38,17 +38,12 @@ void main()
 
     vec2 screenUV = gl_FragCoord.xy / screenSize;
     vec2 distort = vec2(wave1, wave2) - 0.5;
-    distort *= 0.03; // distortion scale
+    distort *= 0.7; // distortion scale
     vec3 refractColor = texture(refractionTex, distort).rgb;
     vec3 reflectColor = texture(reflectionTex, screenUV).rgb;
 
-    float band
-            = smoothstep(1.7, 2.0, manualLod) * smoothstep(2.7, 2.2, manualLod);
-
-    vec3 shineColor = vec3(1.0, 2.5, 1.5);
-    vec3  water = mix(baseColor, refractColor, 0.0) + vec3(moire);
-    vec3 color = mix(water, shineColor, band * 0.0);
-    vec3 finalColor = mix(color, reflectColor, 0.00);
+    vec3  water = mix(baseColor, refractColor, 0.50) + vec3(moire);
+    vec3 finalColor = mix(water, reflectColor, 0.00);
 
 	// -------------------------- 디버그용 ----------------------------
 	// outColor = vec4(band, band, band, 1.0); // 밴드 마스킹 확인
