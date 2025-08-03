@@ -8,8 +8,9 @@ export const [modelVS, modelFS] = await Promise.all([
 function parseOBJ(text) {
   const positions = [[0,0,0]];
   const normals = [[0,0,1]];
-  const outPositions = [];
-  const outNormals = [];
+  const groups = [];
+  let current = { material: 'default', positions: [], normals: [] };
+  groups.push(current);
   const lines = text.split('\n');
   for (const line of lines) {
     const trimmed = line.trim();
@@ -19,6 +20,9 @@ function parseOBJ(text) {
       positions.push(parts.slice(1).map(Number));
     } else if (parts[0] === 'vn') {
       normals.push(parts.slice(1).map(Number));
+    } else if (parts[0] === 'usemtl') {
+      current = { material: parts[1], positions: [], normals: [] };
+      groups.push(current);
     } else if (parts[0] === 'f') {
       const verts = parts.slice(1);
       // triangulate face if necessary
@@ -28,55 +32,62 @@ function parseOBJ(text) {
           const [p, , n] = vert.split('/').map(v => v ? parseInt(v) : 0);
           const pos = positions[p];
           const nor = normals[n];
-          outPositions.push(...pos);
-          outNormals.push(...nor);
+          current.positions.push(...pos);
+          current.normals.push(...nor);
         }
       }
     }
   }
-  return { positions: outPositions, normals: outNormals };
+  return groups.filter(g => g.positions.length > 0);
 }
 
 export class OBJModel {
-  constructor(gl, program, positions, normals) {
+  constructor(gl, program, groups) {
     this.gl = gl;
     this.program = program;
-    this.vertexCount = positions.length / 3;
+    this.groups = groups.map(g => {
+      const vbo = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(g.positions), gl.STATIC_DRAW);
 
-    this.vbo = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+      const nbo = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, nbo);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(g.normals), gl.STATIC_DRAW);
 
-    this.nbo = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.nbo);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+      return { vbo, nbo, vertexCount: g.positions.length / 3, material: g.material };
+    });
   }
 
   static async load(gl, program, url) {
     const text = await fetchText(url);
-    const { positions, normals } = parseOBJ(text);
-    return new OBJModel(gl, program, positions, normals);
+    const groups = parseOBJ(text);
+    return new OBJModel(gl, program, groups);
   }
 
-  draw(model, viewProj, normalMatrix, color, lightDir, camPos) {
+  draw(model, viewProj, normalMatrix, materials, lightDir, camPos) {
     const gl = this.gl;
     gl.useProgram(this.program);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
-    gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.nbo);
-    gl.enableVertexAttribArray(1);
-    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
 
     gl.uniformMatrix4fv(gl.getUniformLocation(this.program, 'u_model'), false, model);
     gl.uniformMatrix4fv(gl.getUniformLocation(this.program, 'u_viewProj'), false, viewProj);
     gl.uniformMatrix3fv(gl.getUniformLocation(this.program, 'u_normalMatrix'), false, normalMatrix);
-    gl.uniform3fv(gl.getUniformLocation(this.program, 'u_color'), color);
     gl.uniform3fv(gl.getUniformLocation(this.program, 'u_lightDir'), lightDir);
     gl.uniform3fv(gl.getUniformLocation(this.program, 'u_camPos'), camPos);
 
-    gl.drawArrays(gl.TRIANGLES, 0, this.vertexCount);
+    gl.enableVertexAttribArray(0);
+    gl.enableVertexAttribArray(1);
+
+    for (const group of this.groups) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, group.vbo);
+      gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, group.nbo);
+      gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
+
+      const mat = materials[group.material] || materials.default || { color: [1,1,1], emissive: [0,0,0] };
+      gl.uniform3fv(gl.getUniformLocation(this.program, 'u_color'), mat.color);
+      gl.uniform3fv(gl.getUniformLocation(this.program, 'u_emissive'), mat.emissive || [0,0,0]);
+
+      gl.drawArrays(gl.TRIANGLES, 0, group.vertexCount);
+    }
   }
 }
