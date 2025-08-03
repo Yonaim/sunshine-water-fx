@@ -5,6 +5,7 @@ in vec3 v_normal;
 in vec3 v_worldPos;
 
 uniform vec3 u_color;
+uniform vec3 u_emissive;
 uniform vec3 u_lightDir;
 uniform vec3 u_camPos;
 
@@ -20,5 +21,5 @@ void main(){
     vec3 ambient = 0.1 * u_color;
     vec3 diffuse = diff * u_color;
     vec3 specular = spec * vec3(1.0);
-    outColor = vec4(ambient + diffuse + specular, 1.0);
+    outColor = vec4(ambient + diffuse + specular + u_emissive, 1.0);
 }
