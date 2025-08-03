@@ -4,7 +4,8 @@ in vec2   v_uv;
 out vec4  outColor;
 
 uniform sampler2D waveTex;
-uniform sampler2D screenColorTex;
+uniform sampler2D reflectionTex;
+uniform sampler2D refractionTex;
 uniform float     u_time;
 uniform float     u_scale;
 uniform float     lodBias;
@@ -27,40 +28,43 @@ void main()
 	vec2 offset2 = vec2(-0.3110, 0.3110) + u_time * vec2(-0.018, 0.021);
 	vec2 uv1 = v_uv + offset1;
 	vec2 uv2 = v_uv + offset2;
-    float lodBias = 0.999; // LOD 편향
-	float manualLod = getManualLod(v_uv, 256.0) + lodBias;
+    float lodBias = 0.5; // LOD 편향
+	float manualLod = getManualLod(v_uv, 256.0);
+	manualLod    = lodBias;
 
 	float wave1 = texture(waveTex, uv1, manualLod).r;
 	float wave2 = texture(waveTex, uv2, manualLod).r;
 	float moire = mix(wave1, wave2, 0.5);
-	float hi    = pow(moire, 10.5);
 
-	vec2 screenUV = gl_FragCoord.xy / screenSize;
-	vec3 bgColor  = texture(screenColorTex, screenUV).rgb;
+    vec2 screenUV = gl_FragCoord.xy / screenSize;
+    vec2 distort = vec2(wave1, wave2) - 0.5;
+    distort *= 0.03; // distortion scale
+    vec3 refractColor = texture(refractionTex, distort).rgb;
+    vec3 reflectColor = texture(reflectionTex, screenUV).rgb;
 
-	float band
-		= smoothstep(1.7, 2.0, manualLod) * smoothstep(2.7, 2.2, manualLod);
+    float band
+            = smoothstep(1.7, 2.0, manualLod) * smoothstep(2.7, 2.2, manualLod);
 
-	vec3 shineColor = vec3(1.0, 2.5, 1.5);
-	float strength = 0.22;
-	vec3  water = bgColor + vec3(moire * strength) + hi * vec3(0.9, 0.95, 1.5);;
-	vec3 finalColor = mix(water, shineColor, band * 0.0);
+    vec3 shineColor = vec3(1.0, 2.5, 1.5);
+    vec3  water = mix(baseColor, refractColor, 0.0) + vec3(moire);
+    vec3 color = mix(water, shineColor, band * 0.0);
+    vec3 finalColor = mix(color, reflectColor, 0.00);
 
 	// -------------------------- 디버그용 ----------------------------
 	// outColor = vec4(band, band, band, 1.0); // 밴드 마스킹 확인
 
-	// vec3 lodColor;
-	// if (manualLod < 1.0)
-	// 	lodColor = vec3(1, 0, 0); // L0
-	// else if (manualLod < 2.0)
-	// 	lodColor = vec3(0, 1, 0); // L1
-	// else if (manualLod < 3.0)
-	// 	lodColor = vec3(0, 0, 1); // L2
-	// else if (manualLod < 4.0)
-	// 	lodColor = vec3(1, 1, 0); // L3
-	// else
-	// 	lodColor = vec3(1, 0, 1); // L4
-	// outColor = vec4(lodColor, 1.0);
+	vec3 lodColor;
+	if (manualLod < 1.0)
+		lodColor = vec3(1, 0, 0); // L0
+	else if (manualLod < 2.0)
+		lodColor = vec3(0, 1, 0); // L1
+	else if (manualLod < 3.0)
+		lodColor = vec3(0, 0, 1); // L2
+	else if (manualLod < 4.0)
+		lodColor = vec3(1, 1, 0); // L3
+	else
+		lodColor = vec3(1, 0, 1); // L4
+	outColor = vec4(lodColor, 1.0);
 
 	// outColor = vec4(manualLod/4.0, manualLod/4.0, manualLod/4.0, 1.0); // LOD값 시각화 (흑백)
 	
@@ -69,7 +73,10 @@ void main()
 	outColor = vec4(finalColor, 1.0);
 	float brightness
 		= dot(outColor.rgb, vec3(0.299, 0.587, 0.114));
-	if (brightness > 0.53 && brightness < 0.72)
+	if (brightness > 0.53 && brightness < 0.92)
 		outColor.a = 0.0; // for compability with webGL version of github.io (github pages) 
 		// discard;
+
+	// outColor = vec4(refractColor, 1.0); // refraction color for debugging
+    // outColor = vec4(reflectColor, 1.0); // reflection color for debugging
 }
