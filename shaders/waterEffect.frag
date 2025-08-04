@@ -10,6 +10,7 @@ uniform float     u_time;
 uniform float     u_scale;
 uniform float     lodBias;
 uniform vec2      screenSize;
+uniform float     reflectionIntensity;
 
 // GLSL ES 3.0 compatible LOD approximation
 float getManualLod(vec2 uv, float textureSize)
@@ -38,8 +39,10 @@ void main()
     vec2 screenUV = gl_FragCoord.xy / screenSize;
     vec2 distort = vec2(wave1, wave2) - 0.5;
     distort *= 1.0; // distortion scale
-    vec3 refractColor = texture(refractionTex, distort).rgb;
+    vec2 refractUV = clamp(screenUV + distort, 0.0, 1.0);
+    vec3 refractColor = texture(refractionTex, refractUV).rgb;
     vec3 reflectColor = texture(reflectionTex, screenUV).rgb;
+    reflectColor = clamp(reflectColor * reflectionIntensity, 0.0, 0.8);
 
     vec3  water = refractColor + vec3(moire);
     vec3 finalColor = mix(water, reflectColor, 0.30);

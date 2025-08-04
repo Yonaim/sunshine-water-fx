@@ -23,7 +23,7 @@ export class WaterPlane {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.verts), gl.STATIC_DRAW);
     }
-    draw(waveTex, time, mvp, reflectionTex, refractionTex, screenSize) {
+    draw(waveTex, time, mvp, reflectionTex, refractionTex, screenSize, reflectionIntensity = 1.0) {
         const gl = this.gl;
         gl.useProgram(this.program);
 
@@ -50,6 +50,7 @@ export class WaterPlane {
         gl.uniform1f(gl.getUniformLocation(this.program, 'u_time'), time);
         gl.uniformMatrix4fv(gl.getUniformLocation(this.program, 'u_modelViewProjection'), false, mvp);
         gl.uniform2f(gl.getUniformLocation(this.program, 'screenSize'), screenSize[0], screenSize[1]);
+        gl.uniform1f(gl.getUniformLocation(this.program, 'reflectionIntensity'), reflectionIntensity);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
