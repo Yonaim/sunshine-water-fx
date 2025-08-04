@@ -64,7 +64,7 @@ export class OBJModel {
     return new OBJModel(gl, program, groups);
   }
 
-  draw(model, viewProj, normalMatrix, materials, lightDir, camPos) {
+  draw(model, viewProj, normalMatrix, materials, lightDir, camPos, clipY = null) {
     const gl = this.gl;
     gl.useProgram(this.program);
 
@@ -73,6 +73,11 @@ export class OBJModel {
     gl.uniformMatrix3fv(gl.getUniformLocation(this.program, 'u_normalMatrix'), false, normalMatrix);
     gl.uniform3fv(gl.getUniformLocation(this.program, 'u_lightDir'), lightDir);
     gl.uniform3fv(gl.getUniformLocation(this.program, 'u_camPos'), camPos);
+    const useClip = clipY !== null;
+    gl.uniform1i(gl.getUniformLocation(this.program, 'u_useClip'), useClip ? 1 : 0);
+    if (useClip) {
+      gl.uniform1f(gl.getUniformLocation(this.program, 'u_clipY'), clipY);
+    }
 
     gl.enableVertexAttribArray(0);
     gl.enableVertexAttribArray(1);

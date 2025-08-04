@@ -45,9 +45,16 @@ const starMaterials = {
     default: { color: [1.0,0.85,0.0], emissive: [0.25,0.21075,0.0] }
 };
 const boxMaterials = {
+    TreasureBox_Mat_v: { color: [0.55,0.27,0.07], emissive: [0.0,0.0,0.0] },
+    'TreasureBox_Mat_v(2)': { color: [0.40,0.20,0.05], emissive: [0.0,0.0,0.0] },
+    TreasureBoxMt_Mat_v: { color: [0.2,0.2,0.2], emissive: [0.0,0.0,0.0] },
+    'TreasureBoxMt_Mat_v(2)': { color: [0.2,0.2,0.2], emissive: [0.0,0.0,0.0] },
+    'TreasureBoxMt_Mat_v(3)': { color: [0.2,0.2,0.2], emissive: [0.0,0.0,0.0] },
+    'TreasureBoxMt_Mat_v(4)': { color: [0.2,0.2,0.2], emissive: [0.0,0.0,0.0] },
     default: { color: [0.55,0.27,0.07], emissive: [0.0,0.0,0.0] }
 };
 const lightDir = vec3.normalize(vec3.create(), [1,1,1]);
+const waterHeight = 0.0;
 
 // ======================== Rendering ========================
 const mipmapFiles = [
@@ -113,24 +120,28 @@ function render(time) {
     const reflectedEye = [eye[0], -eye[1], eye[2]];
     const viewRef = mat4.create();
     mat4.lookAt(viewRef, reflectedEye, [0,0,0], [0,-1,0]);
-    const skyboxViewRef = mat4.clone(viewRef);
-    skyboxViewRef[12]=skyboxViewRef[13]=skyboxViewRef[14]=0;
+    const viewProjRef = mat4.create();
+    mat4.multiply(viewProjRef, proj, viewRef);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, reflectionFbo);
     gl.viewport(0,0,canvas.width,canvas.height);
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 0.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    skybox.draw(skyboxViewRef, proj, reflectionFbo, canvas.width, canvas.height);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, reflectionFbo);
+
     const starModelRef = mat4.create();
     mat4.translate(starModelRef, starModelRef, [0,5,0]);
     mat4.scale(starModelRef, starModelRef, [2,2,2]);
     const normalRef = mat3.create();
     mat3.normalFromMat4(normalRef, starModelRef);
-    const viewProjRef = mat4.create();
-    mat4.multiply(viewProjRef, proj, viewRef);
-    star.draw(starModelRef, viewProjRef, normalRef, starMaterials, lightDir, reflectedEye);
+    star.draw(starModelRef, viewProjRef, normalRef, starMaterials, lightDir, reflectedEye, waterHeight);
+
+    const boxModelRef = mat4.create();
+    mat4.translate(boxModelRef, boxModelRef, [4,-5,5]);
+    mat4.scale(boxModelRef, boxModelRef, [2,2,2]);
+    const boxNormalRef = mat3.create();
+    mat3.normalFromMat4(boxNormalRef, boxModelRef);
+    treasureBox.draw(boxModelRef, viewProjRef, boxNormalRef, boxMaterials, lightDir, reflectedEye, waterHeight);
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     // ----- Main scene -----
