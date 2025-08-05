@@ -36,6 +36,8 @@ const planeScale = 10.0;
 const waterPlane = new WaterPlane(gl, planeProg, planeScale);
 const star = await OBJModel.load(gl, modelProg, 'model/powerStar.obj');
 const treasureBox = await OBJModel.load(gl, modelProg, 'model/treasureBox.obj');
+const pipe = await OBJModel.load(gl, modelProg, 'model/pipe.obj');
+const coin = await OBJModel.load(gl, modelProg, 'model/coin.obj');
 const starMaterials = {
     Empty: { color: [1.0,0.85,0.0], emissive: [0.25,0.21075,0.0] },
     FooMat: { color: [1.0,0.85,0.0], emissive: [0.25,0.21075,0.0] },
@@ -52,6 +54,15 @@ const boxMaterials = {
     'TreasureBoxMt_Mat_v(3)': { color: [0.2,0.2,0.2], emissive: [0.0,0.0,0.0] },
     'TreasureBoxMt_Mat_v(4)': { color: [0.2,0.2,0.2], emissive: [0.0,0.0,0.0] },
     default: { color: [0.55,0.27,0.07], emissive: [0.0,0.0,0.0] }
+};
+const pipeMaterials = {
+    'EarthenPipeMat_v.001': { color: [0.0,0.6,0.0], emissive: [0.0,0.2,0.0] },
+    'EarthenPipeMat_v_x.001': { color: [0.0,0.6,0.0], emissive: [0.0,0.2,0.0] },
+    default: { color: [0.0,0.6,0.0], emissive: [0.0,0.2,0.0] }
+};
+const coinMaterials = {
+    lambert3_v: { color: [1.0,0.84,0.0], emissive: [0.25,0.21,0.0] },
+    default: { color: [1.0,0.84,0.0], emissive: [0.25,0.21,0.0] }
 };
 const lightDir = vec3.normalize(vec3.create(), [1,1,1]);
 const waterHeight = 0.0;
@@ -142,6 +153,20 @@ function render(time) {
     mat3.normalFromMat4(boxNormalRef, boxModelRef);
     treasureBox.draw(boxModelRef, viewProjRef, boxNormalRef, boxMaterials, lightDir, reflectedEye, waterHeight);
 
+    const pipeModelRef = mat4.create();
+    mat4.translate(pipeModelRef, pipeModelRef, [-5,-5,-5]);
+    mat4.scale(pipeModelRef, pipeModelRef, [0.02,0.02,0.02]);
+    const pipeNormalRef = mat3.create();
+    mat3.normalFromMat4(pipeNormalRef, pipeModelRef);
+    pipe.draw(pipeModelRef, viewProjRef, pipeNormalRef, pipeMaterials, lightDir, reflectedEye, waterHeight);
+
+    const coinModelRef = mat4.create();
+    mat4.translate(coinModelRef, coinModelRef, [-5,5,-5]);
+    mat4.scale(coinModelRef, coinModelRef, [2,2,2]);
+    const coinNormalRef = mat3.create();
+    mat3.normalFromMat4(coinNormalRef, coinModelRef);
+    coin.draw(coinModelRef, viewProjRef, coinNormalRef, coinMaterials, lightDir, reflectedEye, waterHeight);
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     // ----- Main scene -----
@@ -161,17 +186,31 @@ function render(time) {
     mat3.normalFromMat4(boxNormal, boxModel);
     treasureBox.draw(boxModel, viewProj, boxNormal, boxMaterials, lightDir, eye);
 
+    const pipeModel = mat4.create();
+    mat4.translate(pipeModel, pipeModel, [-5,-5,-5]);
+    mat4.scale(pipeModel, pipeModel, [0.02,0.02,0.02]);
+    const pipeNormal = mat3.create();
+    mat3.normalFromMat4(pipeNormal, pipeModel);
+    pipe.draw(pipeModel, viewProj, pipeNormal, pipeMaterials, lightDir, eye);
+
     // Capture refraction texture without above-water objects
     gl.bindTexture(gl.TEXTURE_2D, refractionTex);
     gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, canvas.width, canvas.height);
 
-    // Now render objects above the water surface
+    // Render objects above the water surface
     const starModel = mat4.create();
     mat4.translate(starModel, starModel, [0,5,0]);
     mat4.scale(starModel, starModel, [2,2,2]);
     const starNormal = mat3.create();
     mat3.normalFromMat4(starNormal, starModel);
     star.draw(starModel, viewProj, starNormal, starMaterials, lightDir, eye);
+
+    const coinModel = mat4.create();
+    mat4.translate(coinModel, coinModel, [3,1,-5]);
+    mat4.scale(coinModel, coinModel, [2,2,2]);
+    const coinNormal = mat3.create();
+    mat3.normalFromMat4(coinNormal, coinModel);
+    coin.draw(coinModel, viewProj, coinNormal, coinMaterials, lightDir, eye);
 
     const mvp = viewProj;
     waterPlane.draw(
