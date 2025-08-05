@@ -10,14 +10,11 @@ You can see this way -> [https://yonaim.github.io/super-mario-sunshine-water-fx/
 
 ## Feature Checklist
 
-Now developing...
-
 * [x] Wave animation using multi-layer texture scrolling
 * [x] Specular Highlights 
-* [ ] Environment reflection
-* [ ] Refraction
+* [x] Environment reflection
+* [x] Refraction
 * [x] Transparency
-
 
 ## Overview
 
