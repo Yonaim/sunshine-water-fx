@@ -26,19 +26,20 @@ void main()
 	vec2 offset2 = vec2(-0.3110, 0.3110) + u_time * vec2(-0.018, 0.021);
 	vec2 uv1 = v_uv + offset1;
 	vec2 uv2 = v_uv + offset2;
-    float lodBias = 1.0; // LOD 편향
-	float manualLod = getManualLod(v_uv, 256.0);
-	manualLod       = lodBias;
+	float lodBias   = 2.0; // Optional LOD bias
+	float manualLod = getManualLod(v_uv, 256.0) + lodBias;
+	manualLod       = clamp(manualLod, 0.0, 4.0);
 
 	float wave1 = texture(waveTex, uv1, manualLod).r;
 	float wave2 = texture(waveTex, uv2, manualLod).r;
 	float moire = mix(wave1, wave2, 0.5);
 
-    vec2 screenUV = gl_FragCoord.xy / screenSize;
-    vec2 distort = vec2(wave1, wave2) - 0.5;
-    distort *= 1.0; // distortion scale
-    vec3 refractColor = texture(refractionTex, distort).rgb;
-    vec3 dynReflect  = texture(reflectionTex, screenUV).rgb * 0.5; // tone down dynamic objects
+	vec2 screenUV     = gl_FragCoord.xy / screenSize;
+	vec2 distort      = (vec2(wave1, wave2) - 0.5) * 0.05; // 필요 시 스케일 조정
+	vec2 refractUV    = clamp(screenUV + distort, 0.0, 1.0);
+	vec3 refractColor = texture(refractionTex, refractUV).rgb;
+
+	vec3 dynReflect  = texture(reflectionTex, screenUV).rgb * 0.5; // tone down dynamic objects
 
     vec3 water = refractColor + vec3(moire);
     vec3 finalColor = clamp(water + dynReflect * 0.30, 0.0, 1.0);
@@ -65,6 +66,6 @@ void main()
 
 	outColor = vec4(finalColor, 1.0);
     float brightness = dot(outColor.rgb, vec3(0.299, 0.587, 0.114));
-    if (brightness > 0.53 && brightness < 0.92)
-        outColor.a = 0.0; // for compability with webGL version of github.io (github pages)
+	if (0.53 < brightness && brightness < 0.98)
+		outColor.a = 0.0; // for compability with webGL version of github.io (github pages)
 }
