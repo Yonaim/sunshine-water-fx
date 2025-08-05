@@ -38,13 +38,13 @@ void main()
 	vec2 distort      = (vec2(wave1, wave2) - 0.5) * 0.05; // 필요 시 스케일 조정
 	vec2 refractUV    = clamp(screenUV + distort, 0.0, 1.0);
 	vec3 refractColor = texture(refractionTex, refractUV).rgb;
-
-	vec3 dynReflect  = texture(reflectionTex, screenUV).rgb * 0.5; // tone down dynamic objects
+    vec3 dynReflect  = texture(reflectionTex, screenUV).rgb;
 
     vec3 water = refractColor + vec3(moire);
-    vec3 finalColor = clamp(water + dynReflect * 0.30, 0.0, 1.0);
+    float brightness = dot(water, vec3(0.299, 0.587, 0.114)) * 0.83; // RGB to luminance
+    vec3 finalColor = clamp(water + dynReflect * 0.60, 0.0, 1.0);
 
-	// -------------------------- 디버그용 ----------------------------
+    // -------------------------- 디버그용 ----------------------------
 	// outColor = vec4(band, band, band, 1.0); // 밴드 마스킹 확인
 
 	vec3 lodColor;
@@ -64,8 +64,7 @@ void main()
 
 	// outColor = vec4(moire, moire, moire, 1.0);
 
-	outColor = vec4(finalColor, 1.0);
-    float brightness = dot(outColor.rgb, vec3(0.299, 0.587, 0.114));
-	if (0.53 < brightness && brightness < 0.98)
-		outColor.a = 0.0; // for compability with webGL version of github.io (github pages)
+    outColor = vec4(finalColor, 1.0);
+    if (0.50 < brightness && brightness < 0.99)
+            outColor.a = 0.0; // for compability with webGL version of github.io (github pages)
 }

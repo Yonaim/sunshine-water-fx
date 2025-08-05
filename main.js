@@ -153,13 +153,7 @@ function render(time) {
     skyboxView[12]=skyboxView[13]=skyboxView[14]=0;
     skybox.draw(skyboxView, proj);
 
-    const starModel = mat4.create();
-    mat4.translate(starModel, starModel, [0,5,0]);
-    mat4.scale(starModel, starModel, [2,2,2]);
-    const starNormal = mat3.create();
-    mat3.normalFromMat4(starNormal, starModel);
-    star.draw(starModel, viewProj, starNormal, starMaterials, lightDir, eye);
-
+    // Draw objects below the water surface first so they appear only in the refraction texture
     const boxModel = mat4.create();
     mat4.translate(boxModel, boxModel, [4,-5,5]);
     mat4.scale(boxModel, boxModel, [2,2,2]);
@@ -167,8 +161,17 @@ function render(time) {
     mat3.normalFromMat4(boxNormal, boxModel);
     treasureBox.draw(boxModel, viewProj, boxNormal, boxMaterials, lightDir, eye);
 
+    // Capture refraction texture without above-water objects
     gl.bindTexture(gl.TEXTURE_2D, refractionTex);
     gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, canvas.width, canvas.height);
+
+    // Now render objects above the water surface
+    const starModel = mat4.create();
+    mat4.translate(starModel, starModel, [0,5,0]);
+    mat4.scale(starModel, starModel, [2,2,2]);
+    const starNormal = mat3.create();
+    mat3.normalFromMat4(starNormal, starModel);
+    star.draw(starModel, viewProj, starNormal, starMaterials, lightDir, eye);
 
     const mvp = viewProj;
     waterPlane.draw(
