@@ -27,8 +27,8 @@ void main()
 	vec2 uv1 = v_uv + offset1;
 	vec2 uv2 = v_uv + offset2;
 	float lodBias   = 2.0; // Optional LOD bias
-	float manualLod = getManualLod(v_uv, 256.0) + lodBias;
-	manualLod       = clamp(manualLod, 0.0, 4.0);
+	float manualLod = getManualLod(v_uv, 256.0);
+	manualLod       = clamp(manualLod * 0.8 + lodBias, 0.0, 4.0);
 
 	float wave1 = texture(waveTex, uv1, manualLod).r;
 	float wave2 = texture(waveTex, uv2, manualLod).r;
@@ -38,11 +38,11 @@ void main()
 	vec2 distort      = (vec2(wave1, wave2) - 0.5) * 0.05; // 필요 시 스케일 조정
 	vec2 distortedUV  = clamp(screenUV + distort, 0.0, 1.0);
 	vec3 refractColor = texture(refractionTex, distortedUV).rgb;
-	vec3 dynReflect   = texture(reflectionTex, distortedUV).rgb;
+	vec3 reflectColor   = texture(reflectionTex, distortedUV).rgb;
 
 	vec3 water = refractColor + vec3(moire);
     float brightness = dot(water, vec3(0.299, 0.587, 0.114)) * 0.83; // RGB to luminance
-    vec3 finalColor = clamp(water + dynReflect * 0.60, 0.0, 1.0);
+    vec3 finalColor = clamp(water + reflectColor * 0.60, 0.0, 1.0);
 
     // -------------------------- 디버그용 ----------------------------
 	// outColor = vec4(band, band, band, 1.0); // 밴드 마스킹 확인
