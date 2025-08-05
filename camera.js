@@ -6,7 +6,7 @@ import { mat4 } from "https://cdn.jsdelivr.net/npm/gl-matrix@3.4.3/+esm";
  */
 
 const maxDistance = 30.0;
-const minDistance = 0.5; // Minimum distance to prevent camera from going inside the object
+const minDistance = 10.0; // Minimum distance to prevent camera from going inside the object
 
 export class OrbitCamera {
     constructor() {
