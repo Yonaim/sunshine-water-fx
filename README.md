@@ -4,7 +4,7 @@ Reverse engineering and recreation of the water effects from Super Mario Sunshin
 
 ## Live demo
 
-<!-- ![<video controls src="demo.mov" title="Demo"></video>](demo.gif) -->
+![<video controls src="demo.mov" title="Demo"></video>](demo.gif)
 
 You can see this way -> [https://yonaim.github.io/super-mario-sunshine-water-fx/](https://yonaim.github.io/super-mario-sunshine-water-fx/)
 
