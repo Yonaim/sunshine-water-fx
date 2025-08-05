@@ -36,11 +36,11 @@ void main()
 
 	vec2 screenUV     = gl_FragCoord.xy / screenSize;
 	vec2 distort      = (vec2(wave1, wave2) - 0.5) * 0.05; // 필요 시 스케일 조정
-	vec2 refractUV    = clamp(screenUV + distort, 0.0, 1.0);
-	vec3 refractColor = texture(refractionTex, refractUV).rgb;
-    vec3 dynReflect  = texture(reflectionTex, screenUV).rgb;
+	vec2 distortedUV  = clamp(screenUV + distort, 0.0, 1.0);
+	vec3 refractColor = texture(refractionTex, distortedUV).rgb;
+	vec3 dynReflect   = texture(reflectionTex, distortedUV).rgb;
 
-    vec3 water = refractColor + vec3(moire);
+	vec3 water = refractColor + vec3(moire);
     float brightness = dot(water, vec3(0.299, 0.587, 0.114)) * 0.83; // RGB to luminance
     vec3 finalColor = clamp(water + dynReflect * 0.60, 0.0, 1.0);
 
