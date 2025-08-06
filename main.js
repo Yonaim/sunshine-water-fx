@@ -51,7 +51,7 @@ const skyboxProg = createProgram(gl, skyboxVS, skyboxFS);
 const planeProg = createProgram(gl, planeVS, planeFS);
 const modelProg = createProgram(gl, modelVS, modelFS);
 const skybox = new Skybox(gl, skyboxProg, cubemap);
-skyboxSelect.addEventListener('change', e => loadSkybox(e.target.value));
+// skyboxSelect.addEventListener('change', e => loadSkybox(e.target.value));
 
 // ======================== Objects ========================
 const planeScale = 10.0;
