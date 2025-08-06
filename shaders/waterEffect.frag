@@ -3,12 +3,12 @@ precision highp float;
 in vec2   v_uv;
 out vec4  outColor;
 
-uniform sampler2D   waveTex;
-uniform sampler2D   reflectionTex;
-uniform sampler2D   refractionTex;
-uniform float       u_time;
-uniform float       u_scale;
-uniform vec2        screenSize;
+uniform sampler2D waveTex;
+uniform sampler2D reflectionTex;
+uniform sampler2D refractionTex;
+uniform float     u_time;
+uniform float     u_scale;
+uniform vec2      screenSize;
 
 // GLSL ES 3.0 compatible LOD approximation
 float getManualLod(vec2 uv, float textureSize)
@@ -22,10 +22,10 @@ float getManualLod(vec2 uv, float textureSize)
 
 void main()
 {
-	vec2 offset1 = vec2(0.7182, 0.7182) + u_time * vec2(0.02, 0.018);
-	vec2 offset2 = vec2(-0.3110, 0.3110) + u_time * vec2(-0.018, 0.021);
-	vec2 uv1 = v_uv + offset1;
-	vec2 uv2 = v_uv + offset2;
+	vec2  offset1   = vec2(0.7182, 0.7182) + u_time * vec2(0.02, 0.018);
+	vec2  offset2   = vec2(-0.3110, 0.3110) + u_time * vec2(-0.018, 0.021);
+	vec2  uv1       = v_uv + offset1;
+	vec2  uv2       = v_uv + offset2;
 	float lodBias   = 2.0; // Optional LOD bias
 	float manualLod = getManualLod(v_uv, 256.0);
 	manualLod       = clamp(manualLod * 0.8 + lodBias, 0.0, 4.0);
@@ -37,34 +37,39 @@ void main()
 	vec2 screenUV     = gl_FragCoord.xy / screenSize;
 	vec2 distort      = (vec2(wave1, wave2) - 0.5) * 0.05; // 필요 시 스케일 조정
 	vec2 distortedUV  = clamp(screenUV + distort, 0.0, 1.0);
-	vec3 refractColor = texture(refractionTex, distortedUV).rgb;
-	vec3 reflectColor   = texture(reflectionTex, distortedUV).rgb;
+	vec3 refractionTexColor = texture(refractionTex, distortedUV).rgb;
+	vec3 reflectionTexColor = texture(reflectionTex, distortedUV).rgb;
 
-	vec3 water = refractColor + vec3(moire);
-    float brightness = dot(water, vec3(0.299, 0.587, 0.114)) * 0.83; // RGB to luminance
-    vec3 finalColor = clamp(water + reflectColor * 0.60, 0.0, 1.0);
+	vec3 refracted  = refractionTexColor + vec3(moire);
+	vec3 reflected  = reflectionTexColor * 0.6;
+	vec3 waterColor = clamp(reflected + refracted, 0.0, 1.0);
 
-    // -------------------------- 디버그용 ----------------------------
-	// outColor = vec4(band, band, band, 1.0); // 밴드 마스킹 확인
+	// RGB to luminance
+    // luminance must not effected by reflection
+	float brightness = dot(refracted, vec3(0.299, 0.587, 0.114)) * 0.83; 
+	outColor         = vec4(waterColor, 1.0);
+	if (0.50 < brightness && brightness < 0.99)
+		outColor.a = 0.0; // for compability with webGL of github.io
 
-	vec3 lodColor;
-	if (manualLod < 1.0)
-		lodColor = vec3(1, 0, 0); // L0
-	else if (manualLod < 2.0)
-		lodColor = vec3(0, 1, 0); // L1
-	else if (manualLod < 3.0)
-		lodColor = vec3(0, 0, 1); // L2
-	else if (manualLod < 4.0)
-		lodColor = vec3(1, 1, 0); // L3
-	else
-		lodColor = vec3(1, 0, 1); // L4
-	outColor = vec4(lodColor, 1.0);
+	// -------------------------- 디버그용 ----------------------------
 
+	// Lod value visualization (color)
+	// vec3 lodColor;
+	// if (manualLod < 1.0)
+	// 	lodColor = vec3(1, 0, 0); // L0
+	// else if (manualLod < 2.0)
+	// 	lodColor = vec3(0, 1, 0); // L1
+	// else if (manualLod < 3.0)
+	// 	lodColor = vec3(0, 0, 1); // L2
+	// else if (manualLod < 4.0)
+	// 	lodColor = vec3(1, 1, 0); // L3
+	// else
+	// 	lodColor = vec3(1, 0, 1); // L4
+	// outColor = vec4(lodColor, 1.0);
+
+	// Lod value visualization (black)
 	// outColor = vec4(manualLod/4.0, manualLod/4.0, manualLod/4.0, 1.0); // LOD값 시각화 (흑백)
 
+	// moire visualization
 	// outColor = vec4(moire, moire, moire, 1.0);
-
-    outColor = vec4(finalColor, 1.0);
-    if (0.50 < brightness && brightness < 0.99)
-            outColor.a = 0.0; // for compability with webGL version of github.io (github pages)
 }
