@@ -17,21 +17,43 @@ gl.enable(gl.BLEND);
 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 gl.enable(gl.DEPTH_TEST);
 
-// ======================== Objects ========================
-const faceInfos = [
-    { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, url: 'skybox/px.bmp' },
-    { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X, url: 'skybox/nx.bmp' },
-    { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y, url: 'skybox/py.bmp' },
-    { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, url: 'skybox/ny.bmp' },
-    { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z, url: 'skybox/pz.bmp' },
-    { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, url: 'skybox/nz.bmp' },
-  ];
-const cubemap = await loadCubemap(gl, faceInfos);
+// ======================== UI Controls ========================
+const toggleBtn = document.getElementById('toggleObjects');
+let objectsVisible = true;
+toggleBtn.addEventListener('click', () => {
+    objectsVisible = !objectsVisible;
+    toggleBtn.textContent = objectsVisible ? 'Objects: ON' : 'Objects: OFF';
+});
+
+// =============================================================
+
+const skyboxSelect = document.getElementById('skyboxSelect');
+const skyboxPaths = { 1: 'skybox', 2: 'skybox2', 3: 'skybox3' };
+function makeFaceInfos(dir) {
+    return [
+        { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, url: `${dir}/px.bmp` },
+        { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X, url: `${dir}/nx.bmp` },
+        { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y, url: `${dir}/py.bmp` },
+        { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, url: `${dir}/ny.bmp` },
+        { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z, url: `${dir}/pz.bmp` },
+        { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, url: `${dir}/nz.bmp` },
+    ];
+}
+
+async function loadSkybox(idx) {
+    const cm = await loadCubemap(gl, makeFaceInfos(skyboxPaths[idx]));
+    skybox.cubemap = cm;
+}
+
+const cubemap = await loadCubemap(gl, makeFaceInfos(skyboxPaths[1]));
 const camera = new OrbitCamera();
 const skyboxProg = createProgram(gl, skyboxVS, skyboxFS);
 const planeProg = createProgram(gl, planeVS, planeFS);
 const modelProg = createProgram(gl, modelVS, modelFS);
 const skybox = new Skybox(gl, skyboxProg, cubemap);
+skyboxSelect.addEventListener('change', e => loadSkybox(e.target.value));
+
+// ======================== Objects ========================
 const planeScale = 10.0;
 const waterPlane = new WaterPlane(gl, planeProg, planeScale);
 const star = await OBJModel.load(gl, modelProg, 'model/powerStar.obj');
@@ -138,34 +160,35 @@ function render(time) {
     gl.viewport(0,0,canvas.width,canvas.height);
     gl.clearColor(0.0, 0.0, 0.0, 0.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    if (objectsVisible) {
+        const starModelRef = mat4.create();
+        mat4.translate(starModelRef, starModelRef, [0,5,0]);
+        mat4.scale(starModelRef, starModelRef, [2,2,2]);
+        const normalRef = mat3.create();
+        mat3.normalFromMat4(normalRef, starModelRef);
+        star.draw(starModelRef, viewProjRef, normalRef, starMaterials, lightDir, reflectedEye, waterHeight);
 
-    const starModelRef = mat4.create();
-    mat4.translate(starModelRef, starModelRef, [0,5,0]);
-    mat4.scale(starModelRef, starModelRef, [2,2,2]);
-    const normalRef = mat3.create();
-    mat3.normalFromMat4(normalRef, starModelRef);
-    star.draw(starModelRef, viewProjRef, normalRef, starMaterials, lightDir, reflectedEye, waterHeight);
+        const boxModelRef = mat4.create();
+        mat4.translate(boxModelRef, boxModelRef, [4,-5,5]);
+        mat4.scale(boxModelRef, boxModelRef, [2,2,2]);
+        const boxNormalRef = mat3.create();
+        mat3.normalFromMat4(boxNormalRef, boxModelRef);
+        treasureBox.draw(boxModelRef, viewProjRef, boxNormalRef, boxMaterials, lightDir, reflectedEye, waterHeight);
 
-    const boxModelRef = mat4.create();
-    mat4.translate(boxModelRef, boxModelRef, [4,-5,5]);
-    mat4.scale(boxModelRef, boxModelRef, [2,2,2]);
-    const boxNormalRef = mat3.create();
-    mat3.normalFromMat4(boxNormalRef, boxModelRef);
-    treasureBox.draw(boxModelRef, viewProjRef, boxNormalRef, boxMaterials, lightDir, reflectedEye, waterHeight);
+        const pipeModelRef = mat4.create();
+        mat4.translate(pipeModelRef, pipeModelRef, [-5,-5,-5]);
+        mat4.scale(pipeModelRef, pipeModelRef, [0.02,0.02,0.02]);
+        const pipeNormalRef = mat3.create();
+        mat3.normalFromMat4(pipeNormalRef, pipeModelRef);
+        pipe.draw(pipeModelRef, viewProjRef, pipeNormalRef, pipeMaterials, lightDir, reflectedEye, waterHeight);
 
-    const pipeModelRef = mat4.create();
-    mat4.translate(pipeModelRef, pipeModelRef, [-5,-5,-5]);
-    mat4.scale(pipeModelRef, pipeModelRef, [0.02,0.02,0.02]);
-    const pipeNormalRef = mat3.create();
-    mat3.normalFromMat4(pipeNormalRef, pipeModelRef);
-    pipe.draw(pipeModelRef, viewProjRef, pipeNormalRef, pipeMaterials, lightDir, reflectedEye, waterHeight);
-
-    const coinModelRef = mat4.create();
-    mat4.translate(coinModelRef, coinModelRef, [-5,5,-5]);
-    mat4.scale(coinModelRef, coinModelRef, [2,2,2]);
-    const coinNormalRef = mat3.create();
-    mat3.normalFromMat4(coinNormalRef, coinModelRef);
-    coin.draw(coinModelRef, viewProjRef, coinNormalRef, coinMaterials, lightDir, reflectedEye, waterHeight);
+        const coinModelRef = mat4.create();
+        mat4.translate(coinModelRef, coinModelRef, [-5,5,-5]);
+        mat4.scale(coinModelRef, coinModelRef, [2,2,2]);
+        const coinNormalRef = mat3.create();
+        mat3.normalFromMat4(coinNormalRef, coinModelRef);
+        coin.draw(coinModelRef, viewProjRef, coinNormalRef, coinMaterials, lightDir, reflectedEye, waterHeight);
+    }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
@@ -179,38 +202,42 @@ function render(time) {
     skybox.draw(skyboxView, proj);
 
     // Draw objects below the water surface first so they appear only in the refraction texture
-    const boxModel = mat4.create();
-    mat4.translate(boxModel, boxModel, [4,-5,5]);
-    mat4.scale(boxModel, boxModel, [2,2,2]);
-    const boxNormal = mat3.create();
-    mat3.normalFromMat4(boxNormal, boxModel);
-    treasureBox.draw(boxModel, viewProj, boxNormal, boxMaterials, lightDir, eye);
+    if (objectsVisible) {
+        const boxModel = mat4.create();
+        mat4.translate(boxModel, boxModel, [4,-5,5]);
+        mat4.scale(boxModel, boxModel, [2,2,2]);
+        const boxNormal = mat3.create();
+        mat3.normalFromMat4(boxNormal, boxModel);
+        treasureBox.draw(boxModel, viewProj, boxNormal, boxMaterials, lightDir, eye);
 
-    const pipeModel = mat4.create();
-    mat4.translate(pipeModel, pipeModel, [-5,-5,-5]);
-    mat4.scale(pipeModel, pipeModel, [0.02,0.02,0.02]);
-    const pipeNormal = mat3.create();
-    mat3.normalFromMat4(pipeNormal, pipeModel);
-    pipe.draw(pipeModel, viewProj, pipeNormal, pipeMaterials, lightDir, eye);
+        const pipeModel = mat4.create();
+        mat4.translate(pipeModel, pipeModel, [-5,-5,-5]);
+        mat4.scale(pipeModel, pipeModel, [0.02,0.02,0.02]);
+        const pipeNormal = mat3.create();
+        mat3.normalFromMat4(pipeNormal, pipeModel);
+        pipe.draw(pipeModel, viewProj, pipeNormal, pipeMaterials, lightDir, eye);
+    }
 
     // Capture refraction texture without above-water objects
     gl.bindTexture(gl.TEXTURE_2D, refractionTex);
     gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, canvas.width, canvas.height);
 
     // Render objects above the water surface
-    const starModel = mat4.create();
-    mat4.translate(starModel, starModel, [0,5,0]);
-    mat4.scale(starModel, starModel, [2,2,2]);
-    const starNormal = mat3.create();
-    mat3.normalFromMat4(starNormal, starModel);
-    star.draw(starModel, viewProj, starNormal, starMaterials, lightDir, eye);
+    if (objectsVisible) {
+        const starModel = mat4.create();
+        mat4.translate(starModel, starModel, [0,5,0]);
+        mat4.scale(starModel, starModel, [2,2,2]);
+        const starNormal = mat3.create();
+        mat3.normalFromMat4(starNormal, starModel);
+        star.draw(starModel, viewProj, starNormal, starMaterials, lightDir, eye);
 
-    const coinModel = mat4.create();
-    mat4.translate(coinModel, coinModel, [3,1,-5]);
-    mat4.scale(coinModel, coinModel, [2,2,2]);
-    const coinNormal = mat3.create();
-    mat3.normalFromMat4(coinNormal, coinModel);
-    coin.draw(coinModel, viewProj, coinNormal, coinMaterials, lightDir, eye);
+        const coinModel = mat4.create();
+        mat4.translate(coinModel, coinModel, [3,1,-5]);
+        mat4.scale(coinModel, coinModel, [2,2,2]);
+        const coinNormal = mat3.create();
+        mat3.normalFromMat4(coinNormal, coinModel);
+        coin.draw(coinModel, viewProj, coinNormal, coinMaterials, lightDir, eye);
+    }
 
     const mvp = viewProj;
     waterPlane.draw(
